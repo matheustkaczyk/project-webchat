@@ -1,23 +1,20 @@
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
-const MONGO_DB_URL = `mongodb://${process.env.HOST || 'mongodb'}:27017/webchat`;
-const DB_NAME = 'webchat';
+let schema = null;
 
-const OPTIONS = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-};
+async function connection() {
+  if (schema) return Promise.resolve(schema);
+  return MongoClient
+    .connect(process.env.DB_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then((conn) => conn.db(process.env.DB_NAME))
+    .then((dbSchema) => {
+      schema = dbSchema;
+      return schema;
+    });
+}
 
-const connection = null;
-
-const getConnection = () => (connection
-    ? Promise.resolve(connection)
-    : MongoClient.connect(MONGO_DB_URL, OPTIONS)
-        .then((conn) => {
-            const db = conn.db(DB_NAME);
-            return db;
-        })
-);
-
-module.exports = { getConnection };
+module.exports = connection;
