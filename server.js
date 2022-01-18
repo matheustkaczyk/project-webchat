@@ -20,9 +20,9 @@ const io = socketIo(httpServer, {
   },
 });
 
-io.on('connection', (socket) => {
-  console.log(`Alguem se conectou ${socket.id}`);
-});
+// app.use(express.static(path.join(__dirname, '.././views')));
+
+require('./src/sockets/chatMessage')(io);
 
 app.get('/', (_req, res) => {
   res.status(200).sendFile(path.resolve(__dirname, './src/views/index.html'));

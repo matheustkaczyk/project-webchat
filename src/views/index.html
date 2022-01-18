@@ -8,14 +8,66 @@
 </head>
 <body>
 
-  <h3 data-testid="online-user">nome do cliente</h3>
-  <form>
-    <ul/>
-    <input data-testid="message-box" type="text" placeholder="Digite sua mensagem aqui"/>
-    <button data-testid="send-button">Enviar</button>
+  <form id="formNickname">
+    <input id="input-nickname" data-testid="nickname-box" type="text" placeholder="Insira um nickname"/>
+    <button type="submit" data-testid="nickname-button">Salvar</button>
   </form>
-  
+  <form id="formMessage">
+    <ul id="message-list" />
+    <input id="input-msg" data-testid="message-box" type="text" placeholder="Digite sua mensagem aqui"/>
+    <button id="submit-btn" type="submit" data-testid="send-button">Enviar</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const formMessage = document.getElementById('formMessage');
+    const formNickname = document.getElementById('formNickname');
+    const messageInput = document.getElementById('input-msg');
+    const nicknameInput = document.getElementById('input-nickname');
+    const messageList = document.getElementById('message-list');
+
+    let message = { chatMessage: '', nickname: sessionStorage.getItem('nickname') || '', };
+
+    const formattedDate = () => {
+      const date = new Date();
+      const formattedDate = `${date.getDay()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+      const formattedTime = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+      return { formattedDate, formattedTime };
+    };
+
+    formNickname.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      message.nickname = nicknameInput.value;
+      sessionStorage.setItem('nickname', nicknameInput.value);
+
+      return false;
+    })
+
+    formMessage.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      message.chatMessage = messageInput.value;
+
+      socket.emit('message', message);
+      messageInput.value = '';
+      return false;
+    });
+
+    const renderMessage = (nickname, chatMessage) => {
+      const li = document.createElement('li');
+      li.innerText = `${formattedDate().formattedDate} ${formattedDate().formattedTime} - ${nickname}: ${chatMessage}`;
+      messageList.appendChild(li);
+    }
+
+    socket.on('serverMessage', ({ nickname, chatMessage }) => renderMessage(nickname, chatMessage));
+
+    window.onbeforeunload = (e) => {
+      socket.disconnect();
+    }
+
+  </script>
 </body>
-<script src="/socket.io/socket.io.js"></script>
-<script> const socket = io() </script>
 </html>
