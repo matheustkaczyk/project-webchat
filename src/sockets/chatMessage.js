@@ -1,7 +1,6 @@
 module.exports = (io) => {
   io.on('connection', (socket) => {
     console.log(`Usuário se conectou com o id: ${socket.id}`);
-    socket.emit('welcome', 'Um usuário se conectou!');
 
     socket.on('message', (message) => {
       io.emit('serverMessage', message);
