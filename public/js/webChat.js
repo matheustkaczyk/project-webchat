@@ -5,13 +5,11 @@
   const messageInput = document.getElementById('input-msg');
   const nicknameInput = document.getElementById('input-nickname');
   const messageList = document.getElementById('message-list');
-
-  const message = { chatMessage: '', nickname: sessionStorage.getItem('nickname') || '' };
+  const usersList = document.getElementById('users');
 
   formNickname.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    message.nickname = nicknameInput.value;
     sessionStorage.setItem('nickname', nicknameInput.value);
 
     return false;
@@ -19,6 +17,8 @@
 
   formMessage.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    const message = { chatMessage: '', nickname: sessionStorage.getItem('nickname') };
 
     message.chatMessage = messageInput.value;
 
@@ -34,7 +34,29 @@
     messageList.appendChild(li);
   };
 
-  socket.on('message', (msg) => renderMessage(msg));
+  const renderUsers = (user) => {
+    sessionStorage.setItem('nickname', user);
+    const li = document.createElement('li');
+    li.setAttribute('data-testid', 'online-user');
+    li.innerText = user;
+    usersList.appendChild(li);
+
+    return false;
+  };
+
+  socket.on('message', (msg) => {
+    renderMessage(msg);
+
+    // socket.emit('user');
+  });
+
+  socket.on('user', (user) => {
+    renderUsers(user);
+  });
+
+  window.addEventListener('load', () => {
+    socket.emit('user');
+  });
 
   window.onbeforeunload = () => {
     socket.disconnect();

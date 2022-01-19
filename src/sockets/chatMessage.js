@@ -1,12 +1,22 @@
 const fDate = require('../helpers/dateFormatter');
+const randomString = require('../helpers/randomString');
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
     console.log(`Usuário se conectou com o id: ${socket.id}`);
 
-    socket.on('message', (message) => {
-      io.emit('message', `${fDate()} - ${message.nickname}: ${message.chatMessage}`);
+    socket.on('user', () => {
+      io.emit('user', randomString());
     });
+
+    socket.on('message', (message) => {
+      const msg = `${fDate()} - ${message.nickname}: ${message.chatMessage}`;
+      io.emit('message', msg);
+    });
+
+    // socket.on('user', () => {
+    //   io.emit('user', randomName);
+    // });
   });
 
   io.on('disconnect', (socket) => {
