@@ -1,9 +1,11 @@
+const fDate = require('../helpers/dateFormatter');
+
 module.exports = (io) => {
   io.on('connection', (socket) => {
     console.log(`Usuário se conectou com o id: ${socket.id}`);
 
     socket.on('message', (message) => {
-      io.emit('serverMessage', message);
+      io.emit('message', `${fDate()} - ${message.nickname}: ${message.chatMessage}`);
     });
   });
 

@@ -20,12 +20,12 @@ const io = socketIo(httpServer, {
   },
 });
 
-// app.use(express.static(path.join(__dirname, '.././views')));
+app.use(express.static(path.join(__dirname, './public/')));
 
 require('./src/sockets/chatMessage')(io);
 
 app.get('/', (_req, res) => {
-  res.status(200).sendFile(path.resolve(__dirname, './src/views/index.html'));
+  res.status(200).sendFile(path.resolve(__dirname, './public/index.html'));
 });
 
 httpServer.listen(PORT, () => console.log(`Conectado na porta ${PORT}`));
