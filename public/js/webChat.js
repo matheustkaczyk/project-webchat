@@ -1,5 +1,7 @@
   const socket = window.io();
 
+  const datatest = 'data-testid';
+
   const formMessage = document.getElementById('formMessage');
   const formNickname = document.getElementById('formNickname');
   const messageInput = document.getElementById('input-msg');
@@ -28,36 +30,41 @@
   });
 
   const renderMessage = (msg) => {
-    const li = document.createElement('li');
-    li.setAttribute('data-testid', 'message');
-    li.innerText = msg;
-    messageList.appendChild(li);
+    if (typeof msg === 'string') {
+      const li = document.createElement('li');
+      li.setAttribute(datatest, 'message');
+      li.innerText = msg;
+      messageList.appendChild(li);
+      }
+
+    msg.forEach((m) => {
+      const li = document.createElement('li');
+      li.setAttribute(datatest, 'message');
+      li.innerText = `${m.timestamp} - ${m.nickname}: ${m.message}`;
+      messageList.appendChild(li);
+    });
   };
 
   const renderUsers = (user) => {
     sessionStorage.setItem('nickname', user);
     const li = document.createElement('li');
-    li.setAttribute('data-testid', 'online-user');
+    li.setAttribute(datatest, 'online-user');
     li.innerText = user;
     usersList.appendChild(li);
 
     return false;
   };
 
-  socket.on('message', (msg) => {
-    renderMessage(msg);
-
-    // socket.emit('user');
-  });
-
-  socket.on('user', (user) => {
-    renderUsers(user);
-  });
+  socket.on('message', (msg) => renderMessage(msg));
+  socket.on('user', (user) => renderUsers(user));
+  socket.on('loadMessages', (messages) => renderMessage(messages));
 
   window.addEventListener('load', () => {
     socket.emit('user');
+    socket.emit('loadMessages');
+    // socket.emit('message');
   });
 
-  window.onbeforeunload = () => {
-    socket.disconnect();
-  };
+  // window.onbeforeunload = () => {
+  //   socket.disconnect();
+  // };
