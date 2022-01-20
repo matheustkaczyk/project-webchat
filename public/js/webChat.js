@@ -96,7 +96,6 @@
   socket.on('loadMessages', (message) => loadMessages(message));
   socket.on('message', (msg) => renderMessage(msg));
   socket.on('user', (user) => renderUsers(user));
-  socket.on('firstTimeUser', (user) => renderUsers(user));
   socket.on('loadMessages', (messages) => renderMessage(messages));
   socket.on('serverMessage', (serverMessage) => renderMessage(serverMessage));
 
