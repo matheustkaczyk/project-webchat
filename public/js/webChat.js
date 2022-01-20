@@ -60,27 +60,11 @@
     
     users.forEach((user) => {
       const li = document.createElement('li');
-      li.setAttribute('data-testid', 'online-user');
+      li.setAttribute(datatest, 'online-user');
       li.innerText = user.nickname;
       usersList.appendChild(li);
       return false;
     });
-
-    // const alreadyExists = sessionStorage.getItem('nickname');
-
-    // if (!alreadyExists) {
-    //   sessionStorage.setItem('nickname', user);
-    //   const li = document.createElement('li');
-    //   li.setAttribute(datatest, 'online-user');
-    //   li.innerText = user;
-    //   usersList.appendChild(li);
-    //   return false;
-    // }
-
-    // const li = document.createElement('li');
-    // li.setAttribute(datatest, 'online-user');
-    // li.innerText = alreadyExists;
-    // usersList.appendChild(li);
   };
 
   formNickname.addEventListener('submit', (e) => {
