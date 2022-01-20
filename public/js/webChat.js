@@ -8,6 +8,7 @@
   const nicknameInput = document.getElementById('input-nickname');
   const messageList = document.getElementById('message-list');
   const usersList = document.getElementById('users');
+  const userSpan = document.querySelector('#online-user');
 
   const randomString = () => {
     const alphanumeric = 'abcdefghijklmnopqrstuvwxxyz0123456789';
@@ -24,13 +25,9 @@
   const newUser = () => {
     const alreadyExists = sessionStorage.getItem('nickname');
 
-    if (alreadyExists === null) {
-      const newU = randomString();
-      sessionStorage.setItem('nickname', newU);
-      socket.emit('user', newU);
-      return false;
-    }
-    socket.emit('user', alreadyExists);
+    const newU = alreadyExists || randomString();
+    userSpan.innerHTML = newU;
+    socket.emit('user', newU);
   };
 
   const loadMessages = (messages) => {
@@ -59,6 +56,8 @@
     usersList.innerHTML = '';
     
     users.forEach((user) => {
+      const currentUser = userSpan.innerHTML;
+      if (currentUser === user.nickname) return null;
       const li = document.createElement('li');
       li.setAttribute(datatest, 'online-user');
       li.innerText = user.nickname;
@@ -76,6 +75,7 @@
       return false;
     }
 
+    userSpan.innerHTML = nicknameInput.value;
     sessionStorage.setItem('nickname', nicknameInput.value);
     socket.emit('userUpdate', nicknameInput.value);
   });

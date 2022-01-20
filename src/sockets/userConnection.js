@@ -3,7 +3,7 @@ const usersList = [];
 module.exports = (io) => {
   io.on('connection', async (socket) => {
     socket.on('user', (user) => {
-      if (usersList.filter(({ id }) => id === socket.id).length > 0) return false;
+      // if (usersList.filter(({ id }) => id === socket.id).length > 0) return false;
 
       usersList.push({ nickname: user, id: socket.id });
       io.emit('user', usersList);
