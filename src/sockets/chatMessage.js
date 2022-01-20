@@ -11,12 +11,16 @@ module.exports = (io) => {
     socket.emit('loadMessages', loadedMessages);
 
     socket.on('user', (user) => {
-      console.log(user);
+      const alreadyExists = usersList.filter(({ id }) => id === socket.id);
+
+      if (alreadyExists.length > 0) return false;
+
       usersList.push({ nickname: user, id: socket.id });
       io.emit('user', usersList);
     });
 
     socket.on('userUpdate', (updatedUser) => {
+      console.log(updatedUser, usersList);
       usersList.forEach((user, index) => {
         if (user.id === socket.id) usersList[index].nickname = updatedUser;
         io.emit('user', usersList);
@@ -29,8 +33,12 @@ module.exports = (io) => {
       await postMessages(message.chatMessage, message.nickname, fDate());
     });
 
-    // socket.on('disconnect', () => {
-    //   socket.broadcast.emit('serverMessage', `O usuário de id: ${socket.id} se desconectou`);
-    // });
+    socket.on('disconnect', () => {
+      const remove = usersList.filter(({ id }) => id !== socket.id);
+      console.log(remove, socket.id);
+      userList = remove;
+      io.emit('user', userList);
+      console.log('indo para renderizacao')
+    });
   });
 };

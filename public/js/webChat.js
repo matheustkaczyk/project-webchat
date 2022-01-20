@@ -23,7 +23,6 @@
 
   const newUser = () => {
     const alreadyExists = sessionStorage.getItem('nickname');
-    console.log(alreadyExists);
 
     if (alreadyExists === null) {
       const newU = randomString();
@@ -60,8 +59,6 @@
     usersList.innerHTML = '';
     
     users.forEach((user) => {
-      console.log(user);
-      usersList.innerHTML = '';
       const li = document.createElement('li');
       li.setAttribute('data-testid', 'online-user');
       li.innerText = user.nickname;
