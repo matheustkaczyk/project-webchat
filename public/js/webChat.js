@@ -9,25 +9,42 @@
   const messageList = document.getElementById('message-list');
   const usersList = document.getElementById('users');
 
-  formNickname.addEventListener('submit', (e) => {
-    e.preventDefault();
+  const randomString = () => {
+    const alphanumeric = 'abcdefghijklmnopqrstuvwxxyz0123456789';
+    const randomS = [];
+    const anSplit = alphanumeric.split('');
+  
+    for (let index = 0; randomS.length < 16; index = (Math.floor(Math.random() * 10))) {
+      randomS.push(anSplit[index]);
+    }
+  
+    return randomS.join('');
+  };
 
-    sessionStorage.setItem('nickname', nicknameInput.value);
+  const newUser = () => {
+    const alreadyExists = sessionStorage.getItem('nickname');
+    console.log(alreadyExists);
 
-    return false;
-  });
+    if (alreadyExists === null) {
+      const newU = randomString();
+      sessionStorage.setItem('nickname', newU);
+      socket.emit('user', newU);
+      return false;
+    }
+    socket.emit('user', alreadyExists);
+  };
 
-  formMessage.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const message = { chatMessage: '', nickname: sessionStorage.getItem('nickname') };
-
-    message.chatMessage = messageInput.value;
-
-    socket.emit('message', message);
-    messageInput.value = '';
-    return false;
-  });
+  const loadMessages = (messages) => {
+    if (messages) {
+      messageList.innerText = '';
+      messages.forEach((m) => {
+        const li = document.createElement('li');
+        li.setAttribute(datatest, 'message');
+        li.innerText = `${m.timestamp} - ${m.nickname}: ${m.message}`;
+        messageList.appendChild(li);
+      });
+    }
+  };
 
   const renderMessage = (msg) => {
     if (typeof msg === 'string') {
@@ -35,36 +52,78 @@
       li.setAttribute(datatest, 'message');
       li.innerText = msg;
       messageList.appendChild(li);
-      }
+      return false;
+    }
+  };
 
-    msg.forEach((m) => {
+  const renderUsers = (users) => {
+    usersList.innerHTML = '';
+    
+    users.forEach((user) => {
+      console.log(user);
+      usersList.innerHTML = '';
       const li = document.createElement('li');
-      li.setAttribute(datatest, 'message');
-      li.innerText = `${m.timestamp} - ${m.nickname}: ${m.message}`;
-      messageList.appendChild(li);
+      li.setAttribute('data-testid', 'online-user');
+      li.innerText = user.nickname;
+      usersList.appendChild(li);
+      return false;
     });
+
+    // const alreadyExists = sessionStorage.getItem('nickname');
+
+    // if (!alreadyExists) {
+    //   sessionStorage.setItem('nickname', user);
+    //   const li = document.createElement('li');
+    //   li.setAttribute(datatest, 'online-user');
+    //   li.innerText = user;
+    //   usersList.appendChild(li);
+    //   return false;
+    // }
+
+    // const li = document.createElement('li');
+    // li.setAttribute(datatest, 'online-user');
+    // li.innerText = alreadyExists;
+    // usersList.appendChild(li);
   };
 
-  const renderUsers = (user) => {
-    sessionStorage.setItem('nickname', user);
-    const li = document.createElement('li');
-    li.setAttribute(datatest, 'online-user');
-    li.innerText = user;
-    usersList.appendChild(li);
+  formNickname.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-    return false;
-  };
+    if (nicknameInput.value === '') {
+      sessionStorage.setItem('nickname', randomString());
+      socket.emit('userUpdate', randomString());
+      return false;
+    }
 
-  socket.on('message', (msg) => renderMessage(msg));
-  socket.on('user', (user) => renderUsers(user));
-  socket.on('loadMessages', (messages) => renderMessage(messages));
-
-  window.addEventListener('load', () => {
-    socket.emit('user');
-    socket.emit('loadMessages');
-    // socket.emit('message');
+    sessionStorage.setItem('nickname', nicknameInput.value);
+    socket.emit('userUpdate', nicknameInput.value);
   });
 
-  // window.onbeforeunload = () => {
-  //   socket.disconnect();
-  // };
+  formMessage.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const message = {
+      chatMessage: messageInput.value,
+      nickname: sessionStorage.getItem('nickname'),
+    };
+
+    socket.emit('message', message);
+    messageInput.value = '';
+    return false;
+  });
+
+  socket.on('loadMessages', (message) => loadMessages(message));
+  socket.on('message', (msg) => renderMessage(msg));
+  socket.on('user', (user) => renderUsers(user));
+  socket.on('firstTimeUser', (user) => renderUsers(user));
+  socket.on('loadMessages', (messages) => renderMessage(messages));
+  socket.on('serverMessage', (serverMessage) => renderMessage(serverMessage));
+
+  window.addEventListener('load', () => {
+    newUser();
+    socket.emit('loadMessages');
+  });
+
+  window.onbeforeunload = () => {
+    socket.disconnect();
+  };

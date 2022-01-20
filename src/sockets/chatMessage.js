@@ -1,30 +1,36 @@
 const fDate = require('../helpers/dateFormatter');
-const randomString = require('../helpers/randomString');
+// const randomString = require('../helpers/randomString');
 
 const { postMessages, getMessages } = require('../models/webChat');
 
-module.exports = async (io) => {
-  io.on('connection', (socket) => {
-    console.log(`Usuário se conectou com o id: ${socket.id}`);
+const usersList = [];
 
-    socket.on('user', () => {
-      io.emit('user', randomString());
+module.exports = (io) => {
+  io.on('connection', async (socket) => {
+    const loadedMessages = await getMessages();
+    socket.emit('loadMessages', loadedMessages);
+
+    socket.on('user', (user) => {
+      console.log(user);
+      usersList.push({ nickname: user, id: socket.id });
+      io.emit('user', usersList);
     });
 
-    socket.on('loadMessages', async () => {
-      const loadedMessages = await getMessages();
-      io.emit('loadMessages', loadedMessages);
+    socket.on('userUpdate', (updatedUser) => {
+      usersList.forEach((user, index) => {
+        if (user.id === socket.id) usersList[index].nickname = updatedUser;
+        io.emit('user', usersList);
+      });
     });
 
     socket.on('message', async (message) => {
-      const msg = `${fDate()} - ${message.nickname}: ${message.chatMessage}`;
-      io.emit('message', msg);
-
+      console.log(usersList)
+      io.emit('message', `${fDate()} - ${message.nickname}: ${message.chatMessage}`);
       await postMessages(message.chatMessage, message.nickname, fDate());
     });
-  });
 
-  // io.on('disconnect', (socket) => {
-  //   socket.broadcast.emit('serverMessage', `O usuário de id: ${socket.id} se desconectou`);
-  // });
+    // socket.on('disconnect', () => {
+    //   socket.broadcast.emit('serverMessage', `O usuário de id: ${socket.id} se desconectou`);
+    // });
+  });
 };
