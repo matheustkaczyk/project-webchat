@@ -11,5 +11,7 @@ module.exports = (io) => {
       io.emit('message', `${fDate()} - ${message.nickname}: ${message.chatMessage}`);
       await postMessages(message.chatMessage, message.nickname, fDate());
     });
+
+    socket.broadcast.emit('serverMessage', `O usuário com o id: ${socket.id} se conectou!`);
   });
 };

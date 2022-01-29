@@ -26,6 +26,8 @@
     const alreadyExists = sessionStorage.getItem('nickname');
 
     const newU = alreadyExists || randomString();
+    sessionStorage.setItem('nickname', newU);
+
     userSpan.innerHTML = newU;
     socket.emit('user', newU);
   };
@@ -66,6 +68,14 @@
     });
   };
 
+  // const renderWelcome = (nick) => {
+  //   const li = document.createElement('li');
+  //     li.setAttribute(datatest, 'message');
+  //     li.innerText = nick;
+  //     messageList.appendChild(li);
+  //     return false;
+  // };
+
   formNickname.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -96,12 +106,10 @@
   socket.on('loadMessages', (message) => loadMessages(message));
   socket.on('message', (msg) => renderMessage(msg));
   socket.on('user', (user) => renderUsers(user));
-  socket.on('loadMessages', (messages) => renderMessage(messages));
   socket.on('serverMessage', (serverMessage) => renderMessage(serverMessage));
 
   window.addEventListener('load', () => {
     newUser();
-    socket.emit('loadMessages');
   });
 
   window.onbeforeunload = () => {
