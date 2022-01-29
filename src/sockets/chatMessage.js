@@ -12,6 +12,14 @@ module.exports = (io) => {
       await postMessages(message.chatMessage, message.nickname, fDate());
     });
 
-    socket.broadcast.emit('serverMessage', `O usuário com o id: ${socket.id} se conectou!`);
+    socket.on('serverMessage', (user) => {
+      socket.broadcast.emit('serverMessage', `${user} se conectou! Seja bem vindo.`);
+    });
+
+    socket.on('changeNickname', ({ oldNickname, newNickname }) => {
+      socket.broadcast.emit(
+        'serverMessage', `O usuário ${oldNickname} agora se chama ${newNickname}`,
+      );
+    });
   });
 };

@@ -30,6 +30,8 @@
 
     userSpan.innerHTML = newU;
     socket.emit('user', newU);
+
+    socket.emit('serverMessage', newU);
   };
 
   const loadMessages = (messages) => {
@@ -68,16 +70,9 @@
     });
   };
 
-  // const renderWelcome = (nick) => {
-  //   const li = document.createElement('li');
-  //     li.setAttribute(datatest, 'message');
-  //     li.innerText = nick;
-  //     messageList.appendChild(li);
-  //     return false;
-  // };
-
   formNickname.addEventListener('submit', (e) => {
     e.preventDefault();
+    const oldNickname = sessionStorage.getItem('nickname');
 
     if (nicknameInput.value === '') {
       sessionStorage.setItem('nickname', randomString());
@@ -88,6 +83,8 @@
     userSpan.innerHTML = nicknameInput.value;
     sessionStorage.setItem('nickname', nicknameInput.value);
     socket.emit('userUpdate', nicknameInput.value);
+    const usersInfo = { oldNickname, newNickname: userSpan.innerText };
+    socket.emit('changeNickname', usersInfo);
   });
 
   formMessage.addEventListener('submit', (e) => {
@@ -106,7 +103,7 @@
   socket.on('loadMessages', (message) => loadMessages(message));
   socket.on('message', (msg) => renderMessage(msg));
   socket.on('user', (user) => renderUsers(user));
-  socket.on('serverMessage', (serverMessage) => renderMessage(serverMessage));
+  socket.on('serverMessage', (message) => renderMessage(message));
 
   window.addEventListener('load', () => {
     newUser();
